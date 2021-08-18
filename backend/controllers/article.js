@@ -145,7 +145,13 @@ exports.deleteArticle = async (req, res, next) => {
     try {
         let id = req.params.id;
         const response = await db.promise().query(`DELETE FROM articles WHERE id = ${id}`);
-        res.status(201).json({msg: "article supprimé"});
+        try {
+            const deleteComments = await db.promise().query(`DELETE FROM comments WHERE id_article = ${id}`);
+            res.status(201).json({msg: "article supprimé"});
+        }
+        catch(err) {
+            console.log(err);
+        }
     }
     catch (err) {
         console.log(err);

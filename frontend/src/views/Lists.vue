@@ -13,6 +13,9 @@
       <div v-if="this.$route.path == '/all-conversations'">
           <ListConversations/>
       </div>
+      <div v-if="this.$route.path == '/all-posts'">
+          <ListPosts/>
+      </div>
       </main>
   </div>
 </template>
@@ -21,12 +24,14 @@
 
 import ListArticles from '@/components/ListArticles.vue'
 import ListConversations from '@/components/ListConversations.vue'
+import ListPosts from '@/components/ListPosts.vue'
 
 export default {
   name: 'Lists',
   components: {
     ListArticles,
     ListConversations,
+    ListPosts,
   },
   mounted() {
   },

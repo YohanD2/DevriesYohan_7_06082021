@@ -33,7 +33,6 @@ exports.login = async (req, res, next) => {
 
         const response = await db.promise().query(`SELECT * FROM users WHERE email = '${email}'`);
         const validPassword = await bcrypt.compare(password, response[0][0].password);
-
         if( validPassword ) {
             id = response[0][0].id
             res.status(200).json({

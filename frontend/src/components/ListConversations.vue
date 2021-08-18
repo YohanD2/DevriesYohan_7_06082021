@@ -11,11 +11,7 @@
         <div class="conversations__container" v-for="(conversation, index) in conversations" v-bind:key="conversation.id">
             <router-link :to="{ name: 'GetConversation', params: { id: conversation.id }}">
                 <div class="conversation">
-                    <div class="conversation__avatar">
-                        <div class="imgAvatar">
-                            <img src="" alt="">
-                        </div>
-                        
+                    <div class="conversation__avatar">                   
                         <p>{{ conversation.email }}</p>
                     </div>
                     <div class="conversation__action">
@@ -111,13 +107,6 @@ export default({
         .conversation__avatar {
             display: flex;
             align-items: center;
-        }
-
-        .imgAvatar {
-            height: 30px;
-            width: 30px;
-            border: 1px solid lightgrey;
-            border-radius: 5px;
         }
         .conversation__avatar p {
             margin-left: 8px;

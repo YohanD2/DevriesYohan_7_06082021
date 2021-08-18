@@ -11,8 +11,6 @@ const userController = require('../controllers/user');
 //GET ONE 
 router.get('/:id', userController.getOneUser);
 
-//CREATE ONE 
-router.post('/new', validation.createUser, userController.createUser);
 
 //MODIFY ONE
 //router.put('/modify/:id', messageController.modifyMessage);
@@ -21,6 +19,6 @@ router.post('/new', validation.createUser, userController.createUser);
 //router.post('/new', messageController.createMessage);
 
 //DELETE ONE
-router.delete('/delete/:id', userController.deleteUser);
+router.delete('/delete', userController.deleteUser);
 
 module.exports = router;

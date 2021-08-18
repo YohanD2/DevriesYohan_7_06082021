@@ -5,9 +5,6 @@
         </div>
          <h1>Chat avec :</h1>
         <div class="profil">
-            <div class="profil__img">
-                <img src="">
-            </div>
             <p class="profil__email bold">{{ email }}</p>
         </div>
         <h2>Votre conversation :</h2>
@@ -24,13 +21,12 @@
             <input v-model="content" name='content' type="text">
             <label for="avatar">Ajouter une image</label>
 
-            <input @change="selectImg" type="file"
+            <input ref="inputFile" @change="selectImg" type="file"
                 id="avatar" name="avatar"
                 accept="image/png, image/jpeg">
 
             <input type="submit" value="Envoyer">
         </form>
-        {{ selectedFile }}
     </div>
     
 </template>
@@ -132,7 +128,7 @@ export default({
 
                     this.messages.push(message);
                     this.content = '';
-                    
+                    this.$refs.inputFile.value=null                   
                 }, (err) => {
                     this.error = err.response.data;
                 })

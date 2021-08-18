@@ -35,11 +35,11 @@ exports.createMessage = async (req, res, next) => {
     if(req.file != undefined) {
         message = req.body.content.replace(/&quot;/g,'"');
         message = JSON.parse(message);
-         id_conversation = message.id_conversation;
-         id_user_by = message.id_user_by;
-         content = message.content;
+        id_conversation = message.id_conversation;
+        id_user_by = message.id_user_by;
+        content = message.content;
         var urlImg = req.protocol + "://" + req.get('host') + "/images/" + req.file.filename;
-        sql = 'INSERT INTO messages (content, id_conversation, id_user_by, urlImg) VALUES ("' + content + '", ' + id_conversation + ', ' + id_user_by + ', "' + urlImg + '")';
+        sql = 'INSERT INTO messages (content, id_conversation, id_user_by, url_img) VALUES ("' + content + '", ' + id_conversation + ', ' + id_user_by + ', "' + urlImg + '")';
     } else {
         message = req.body;
         id_conversation = message.id_conversation;

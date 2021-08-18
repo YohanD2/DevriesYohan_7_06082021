@@ -10,9 +10,7 @@
         <h2>Commentaires :</h2>
         <div class="comment" v-for="(comment) in comments" v-bind:key="comment.id">
             <div class="comment__header">
-                <div class="imgAvatar">
-                    <img src="" alt="">
-                </div>
+
                 
                 <p>{{ comment.email }}</p>
             </div>

@@ -15,7 +15,6 @@ export default ({
     width: 100%;
 }
 .alert{
-    width: 100%;
     background-color:rgba(255, 0, 0, 0.6);
     color:white;
     border-radius: 5px;
@@ -23,5 +22,6 @@ export default ({
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 16px 16px;
 }
 </style>

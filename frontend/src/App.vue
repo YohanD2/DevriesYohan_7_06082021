@@ -159,12 +159,6 @@ export default({
         display: flex;
         align-items: center;
     }
-    .profil__img {
-        height: 50px;
-        width: 50px;
-        border: 1px solid lightgrey;
-        Border-radius: 5px;
-    }
     .profil__email {
         margin-left: 8px;
         color: black;
@@ -179,7 +173,14 @@ export default({
     .choice__section :nth-child(2) {
         margin-top: 16px;
     }
-
+textarea{
+          border: 1px solid #19233e;
+          border-radius: 5px;
+          max-width:100%;
+          min-width:100%;
+          max-height: 260px;
+          box-sizing: border-box;
+      }
 @media screen and (min-width: 992px) {
   #app {
       display: flex;

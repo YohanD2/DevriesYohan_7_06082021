@@ -57,6 +57,7 @@ export default({
                 const message = {};
                 message.content = submitEvent.target.elements.content.value;
                 message.id_conversation = response.data;
+                message.id_user_by = localStorage.getItem('idUser');
 
 
                 axios.post("http://localhost:3000/api/message/new", message , {
@@ -67,8 +68,6 @@ export default({
 
                 .then(() => {
                     this.$router.push('/conversation/' + message.id_conversation);
-
-
                 }, (err) => {
                     this.error = err.response.data;
                 })

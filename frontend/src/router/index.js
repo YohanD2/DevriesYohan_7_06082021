@@ -4,6 +4,7 @@ import Log from '../views/Log.vue'
 import Home from '../views/Home.vue'
 import Lists from '../views/Lists.vue'
 import Article from '../views/Article.vue'
+import Post from '../views/Post.vue'
 import Conversation from '../views/Conversation.vue'
 
 
@@ -51,6 +52,26 @@ const routes = [
     component: Article
   },
   {
+    path: '/all-posts',
+    name: 'ListPosts',
+    component: Lists
+  },
+  {
+    path: '/new/post',
+    name: 'NewPost',
+    component: Post
+  },
+  {
+    path: '/modify/post/:id',
+    name: 'ModifyPost',
+    component: Post
+  },
+  {
+    path: '/post/:id',
+    name: 'GetPost',
+    component: Post
+  },
+  {
     path: '/new/conversation',
     name: 'NewConversation',
     component: Conversation
@@ -59,14 +80,6 @@ const routes = [
     path: '/conversation/:id',
     name: 'GetConversation',
     component: Conversation
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   }
 ]
 

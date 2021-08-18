@@ -27,7 +27,9 @@ app.use(express.urlencoded({extended: true}));
 const auth = require('./auth');
 
 const articleRoutes = require('./routes/article');
+const postRoutes = require('./routes/post');
 const commentRoutes = require('./routes/comment');
+const reactionRoutes = require('./routes/reaction');
 const conversationRoutes = require('./routes/conversation');
 const messageRoutes = require('./routes/message');
 const userRoutes = require('./routes/user');
@@ -35,6 +37,8 @@ const authRoutes = require('./routes/auth');
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/article', auth, articleRoutes);
+app.use('/api/post', auth, postRoutes);
+app.use('/api/reaction', auth, reactionRoutes);
 app.use('/api/comment', auth, commentRoutes);
 app.use('/api/conversation', auth, conversationRoutes);
 app.use('/api/message', auth, messageRoutes);

@@ -1,8 +1,10 @@
 const { check } = require('express-validator/check');
 const db = require('./database');
+
 // AUTH
 // ARTICLE
-
+// COMMENT
+// MESSAGE
 
 // AUTH 
 exports.createUser = [
@@ -21,7 +23,9 @@ exports.createUser = [
 
   check('password')
     .notEmpty()
+    .withMessage('Vous devez entrer un mot de passe')
     .isLength({ min: 8 })
+    .withMessage('Le mot de passe doit faire 8 caractères minimum')
     .escape(),
 ];
 
@@ -33,13 +37,15 @@ exports.loginUser = [
       return db.promise().query(`SELECT * FROM users WHERE email = '${value}'`)
          .then((response) => {
            if( response[0].length == 0 ) {
-            return Promise.reject('Le mot de passe ou l\'adresse mail est incorrect. Veuillez réessayer.')
+            return Promise.reject('Aucun compte ne correspond à cet identifiant.')
            }
          })
    }),
   check('password')
     .notEmpty()
+    .withMessage('Vous devez entrer un mot de passe')
     .isLength({ min: 8 })
+    .withMessage('Identifiant ou mot de passe incorrect')
     .escape(),
 ];
 
