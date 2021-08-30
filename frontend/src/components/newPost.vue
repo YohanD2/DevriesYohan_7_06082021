@@ -14,7 +14,7 @@
 
             <input ref="inputFile" @change="selectImg" type="file"
                 id="avatar" name="avatar"
-                accept="image/png, image/jpeg">
+                accept="image/gif" required>
 
             <div class="inputLine">
                 <input type="submit" value="Créer le post">
@@ -26,6 +26,8 @@
 <script>
 import Alert from '@/components/Alert.vue'
 import axios from 'axios';
+import {escapeHtml, validationText} from "@/validation";
+
 
 export default({
     data() {
@@ -38,19 +40,27 @@ export default({
         Alert,
     },
     methods: {
+        escapeHtml,
+        validationText,
         getFormValues(submitEvent){
             this.error = '';
+            let error = false;
+            var data = new FormData();
 
-              let post = {};
-                post.title = submitEvent.target.elements.title.value;
-                post = JSON.stringify(post);
-
-                let data = new FormData();
+            let title = escapeHtml(submitEvent.target.elements.title.value);
+            var checkTitle = validationText(title);
+             if(checkTitle == null) {
+                error = true;
+            } else {
+                data.append('title', checkTitle);
+            }
+            if (error == false) {
                 data.append('image', this.selectedFile, this.selectedFile.name)
-                data.append('content', post)
+                data.append('id_user',localStorage.getItem('idUser'))
 
                 axios.post("http://localhost:3000/api/post/new", data, {
                     headers:{
+
                         'Content-Type' : 'multipart/form-data',
                         'Authorization': 'Bearer ' + localStorage.getItem('token'),
                     }
@@ -61,6 +71,10 @@ export default({
                 }, (err) => {
                     this.error = err.response.data;
                 })
+            } else {
+                this.error = "Veuillez entrer un titre valide";
+            }
+               
         },
         selectImg(event) {
             this.selectedFile = event.target.files[0]; 

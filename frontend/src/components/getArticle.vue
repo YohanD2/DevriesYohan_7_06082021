@@ -15,12 +15,12 @@
                 <p>{{ comment.email }}</p>
             </div>
             <div class="comment__body">
-                <p class="infoText">{{ comment.content }}</p>
+                <p class="infoText" >{{ comment.content }}</p>
             </div>
         </div>
         <form @submit.prevent="getFormValues" class="form__comment">
             <p class="infoText">Commentaire</p>
-            <input name="comment" type="text">
+            <input v-model="comment" name="comment" type="text">
         <input type="submit" value="Poster">
         </form>
     </div>
@@ -53,7 +53,6 @@ export default({
                 }
             })
              .then((response) => {
-                 console.log(response);
                 this.article = response.data.article[0];
                 this.comments = response.data.comments;
             })
@@ -64,6 +63,7 @@ export default({
 
             const comment = {};
             comment.content = submitEvent.target.elements.comment.value;
+            comment.id_user = localStorage.getItem('idUser');
             let idArticle = this.$route.params.id;
 
             axios.post("http://localhost:3000/api/comment/new/" + idArticle, comment, {

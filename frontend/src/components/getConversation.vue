@@ -10,8 +10,8 @@
         <h2>Votre conversation :</h2>
         <div class="chat">
             <div :class="{ 'me' : message.id_user_by == idUser}" class="message" v-for="(message) in messages" v-bind:key="message.id">
-                <div class="alert-container" v-if="message.urlImg != null">
-                    <img :src="message.urlImg" />              
+                <div class="alert-container" v-if="message.url_img != null">
+                    <img :src="message.url_img" />              
                 </div>
                 <p :class="{ 'myMessage' : message.id_user_by == idUser}">{{ message.content }}</p>
             </div>
@@ -54,7 +54,7 @@ export default({
         getMessages() {
             let id = this.url_data=this.$route.params.id;
             this.id = id;
-            this.idUser = localStorage.getItem('idUser')
+            this.idUser = localStorage.getItem('idUser');
             axios.get("http://localhost:3000/api/conversation/" + id, {
                 headers:{
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -117,13 +117,12 @@ export default({
                     }
                 })
                 .then((response) => {
-
                     let message = {
                         content : response.data.content,
                         id : response.data.id,
                         id_user_by : response.data.id_user_by,
                         id_conversation : response.data.id_conversation,
-                        urlImg : response.data.urlImg,
+                        url_img : response.data.urlImg,
                     };
 
                     this.messages.push(message);

@@ -3,7 +3,8 @@ const multer = require('multer');
 const MIME_TYPES = {
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
-  'image/png': 'png'
+  'image/png': 'png',
+  'image/gif': 'gif'
 };
 
 const storage = multer.diskStorage({
@@ -16,5 +17,12 @@ const storage = multer.diskStorage({
     callback(null, name + Date.now() + '.' + extension);
   }
 });
+
+fileFilter: (req, file, cb) => {
+  if (!MIME_TYPES.includes(file.mimetype)) {
+    return cb(new Error('file is not allowed'))
+  }
+  callback(null, true)
+}
 
 module.exports = multer({storage: storage}).single('image');

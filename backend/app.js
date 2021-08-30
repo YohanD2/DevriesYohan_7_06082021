@@ -42,7 +42,7 @@ app.use('/api/reaction', auth, reactionRoutes);
 app.use('/api/comment', auth, commentRoutes);
 app.use('/api/conversation', auth, conversationRoutes);
 app.use('/api/message', auth, messageRoutes);
-app.use('/api/user', auth, userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 
 module.exports = app;

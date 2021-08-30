@@ -15,7 +15,7 @@
                     <div class="article__header">
                         <h2>{{ post.title }}</h2>
                         
-                        <div v-if="post.id_user == idUser" class="article__action">
+                        <div v-if="post.id_user == idUser || role == 'ADMIN'" class="article__action">
                             <router-link :to="{ name: 'ModifyPost', params: { id: post.id }}">
                                 <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.65385 3.30769H1V16H12.5385V9.07692M14.8462 1L5.03846 11.3846L3.88462 13.6923L6.19231 12.5385L16 2.15385L14.8462 1Z" stroke="#19233E" stroke-linecap="round" stroke-linejoin="round"/>
@@ -54,6 +54,7 @@
           
 <script>
 import axios from 'axios';
+import { mapState } from 'vuex';
 
 export default({
     data() {
@@ -61,6 +62,11 @@ export default({
             posts: [],
             idUser: ''
         }
+    },
+    computed: {
+        ...mapState({
+            role: 'role'
+        })
     },
     methods: {
         getUnits(){

@@ -14,8 +14,7 @@
                 <div class="article">
                     <div class="article__header">
                         <h2>{{ article.title }}</h2>
-                        
-                        <div v-if="article.id_user == idUser" class="article__action">
+                        <div v-if="article.id_user == idUser || role == 'ADMIN'" class="article__action">
                             <router-link :to="{ name: 'ModifyArticle', params: { id: article.id }}">
                                 <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.65385 3.30769H1V16H12.5385V9.07692M14.8462 1L5.03846 11.3846L3.88462 13.6923L6.19231 12.5385L16 2.15385L14.8462 1Z" stroke="#19233E" stroke-linecap="round" stroke-linejoin="round"/>
@@ -25,7 +24,6 @@
                                 <svg v-on:click.prevent="deleteArticle(article.id, index)" width="16" height="19" viewBox="0 0 16 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M8 2.61905H1.82353L1 5.04762H15L14.1765 2.61905H8ZM8 2.61905V1M1.41176 6.2619H14.5882L13.7647 18H8H2.23529L1.41176 6.2619ZM3.47059 7.47619H5.11765V16.381H3.88235L3.47059 7.47619ZM12.5294 7.47619H10.8824V16.381H12.1176L12.5294 7.47619ZM7.17647 7.47619H8.82353V16.381H7.17647V7.47619Z" stroke="#FD2D01" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                                            
                         </div>
                     </div>
                     <div class="article__content">
@@ -53,6 +51,7 @@
           
 <script>
 import axios from 'axios';
+import { mapState } from 'vuex';
 
 export default({
     data() {
@@ -60,6 +59,11 @@ export default({
             articles: [],
             idUser: ''
         }
+    },
+    computed: {
+        ...mapState({
+            role: 'role'
+        })
     },
     methods: {
         getUnits(){
@@ -70,7 +74,6 @@ export default({
             })
             .then((response) => {
                 this.articles = response.data;
-                //console.log(response.data[0]);
                 this.idUser = localStorage.getItem('idUser');
             })
         },
@@ -83,8 +86,6 @@ export default({
             .then(() => {
                 this.articles.splice(index, 1);
             })
-        
-            
         }
         },
         beforeMount(){

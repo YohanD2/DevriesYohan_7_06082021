@@ -6,9 +6,9 @@ import Lists from '../views/Lists.vue'
 import Article from '../views/Article.vue'
 import Post from '../views/Post.vue'
 import Conversation from '../views/Conversation.vue'
+import store from '../store'
 
-
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
   {
@@ -24,7 +24,14 @@ const routes = [
   {
     path: '/home',
     name: 'Home',
-    component: Home
+    component: Home,
+    beforeEnter: (to, from, next) => {
+      if (store.state.authenticated == true ) {
+        next();
+      } else {
+        next({ name: 'Log' })
+      }
+    },
   },
   {
     path: '/all-articles',

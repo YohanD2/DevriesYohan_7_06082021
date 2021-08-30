@@ -12,7 +12,7 @@
             
             <div class="inputLine">
                 <label class="infoText" for="story">Contenu de l'article</label>
-                <textarea name="content" id="story" rows="5" cols="33" :value="article.content">
+                <textarea name="content" id="story" rows="5" cols="33" :value="article.content" required>
                 </textarea>
             </div>
             <div class="inputLine">
@@ -25,6 +25,8 @@
 
 import axios from 'axios';
 import Alert from '@/components/Alert.vue'
+import {escapeHtml, validationText} from '@/validation';
+
 
 export default({
     data() {
@@ -37,22 +39,46 @@ export default({
         Alert,
     },
     methods: {
+        escapeHtml,
+        validationText,
         getFormValues(submitEvent){
             this.error = '';
             const article = {};
-            article.title = submitEvent.target.elements.title.value;
-            article.content = submitEvent.target.elements.content.value;
-            axios.put("http://localhost:3000/api/article/modify/" + this.$route.params.id, article, {
-                headers:{
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                }
-            })
-            .then((response) => {
-                this.$router.push('/article/' + response.data.id);
 
-            }, (err) => {
-                this.error = err.response.data;
-            })
+            let error = false;
+            let title = escapeHtml(submitEvent.target.elements.title.value);
+            let content = escapeHtml(submitEvent.target.elements.content.value);
+
+
+            let checkTitle = validationText(title);
+             if(checkTitle == null) {
+                error = true;
+            } else {
+                article.title = checkTitle;
+            }
+
+            let checkContent = validationText(content);
+             if(checkContent == null) {
+                error = true;
+            } else {
+                article.content = checkContent;
+            }
+
+            if ( error == false ) {
+                axios.put("http://localhost:3000/api/article/modify/" + this.$route.params.id, article, {
+                    headers:{
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                })
+                .then((response) => {
+                    this.$router.push('/article/' + response.data.id);
+
+                }, (err) => {
+                    this.error = err.response.data;
+                })
+            } else {
+                this.error = "Veuillez entrer du text valide";
+            }
         },
         getArticle() {
             let id = this.$route.params.id;

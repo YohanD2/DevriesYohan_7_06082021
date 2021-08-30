@@ -8,13 +8,13 @@
         <form @submit.prevent="getFormValues">
             <div class="inputLine">
                 <label  class="infoText">Email de votre correspondant</label>
-                <input name="user_id_to" type="text" required>
+                <input name="email" type="email" required>
             </div>
 
             <div class="inputLine">
                 <label class="infoText" for="story">Vore message</label>
                 <textarea name="content" id="story"
-                        rows="5" cols="33">
+                        rows="5" cols="33" required>
                 </textarea>
             </div>
             <div class="inputLine">
@@ -26,6 +26,8 @@
 <script>
 import axios from 'axios';
 import Alert from '@/components/Alert.vue';
+import {escapeHtml, validationEmail, validationText} from "@/validation";
+
 
 export default({
     data() {
@@ -38,42 +40,69 @@ export default({
         Alert,
     },
     methods: {
+        escapeHtml,
+        validationEmail,
+        validationText,
         getFormValues(submitEvent){
             this.error = '';
+            let error = false;
 
-            this.id_user_by = submitEvent.target.elements.user_id_to.value;
-            
+            let email = escapeHtml(submitEvent.target.elements.email.value);          
             const conversation = {};
-            conversation.id_user_by = localStorage.getItem('idUser');
-            conversation.email = submitEvent.target.elements.user_id_to.value;
-
-            axios.post("http://localhost:3000/api/conversation/new", conversation, {
-                headers:{
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                }
-            })
-            .then((response) => {
-                
-                const message = {};
-                message.content = submitEvent.target.elements.content.value;
-                message.id_conversation = response.data;
-                message.id_user_by = localStorage.getItem('idUser');
 
 
-                axios.post("http://localhost:3000/api/message/new", message , {
+            var checkEmail = validationEmail(email);
+             if(checkEmail == null) {
+                error = true;
+            } else {
+                conversation.email = checkEmail;
+            }
+
+            if (error == false) {
+                conversation.id_user_by = localStorage.getItem('idUser');
+
+                axios.post("http://localhost:3000/api/conversation/new", conversation, {
                     headers:{
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
                     }
                 })
+                .then((response) => {
+                    
+                    let content = escapeHtml(submitEvent.target.elements.content.value);
+                    var checkContent = validationText(content);
+                    const message = {};
+                    if(checkContent == null) {
+                        error = true;
+                    } else {
+                        message.content = checkContent;
+                    }
 
-                .then(() => {
-                    this.$router.push('/conversation/' + message.id_conversation);
+                    if (error == false) {
+                        message.id_conversation = response.data;
+                        message.id_user_by = localStorage.getItem('idUser');
+
+                        axios.post("http://localhost:3000/api/message/new", message , {
+                            headers:{
+                                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                            }
+                        })
+
+                        .then(() => {
+                            this.$router.push('/conversation/' + message.id_conversation);
+                        }, (err) => {
+                            this.error = err.response.data;
+                        })
+                    } else {
+                        this.error = "Veuillez entrer du text valide";
+                    }
                 }, (err) => {
                     this.error = err.response.data;
                 })
-            }, (err) => {
-                this.error = err.response.data;
-            })
+            } else {
+                this.error = "Veuillez entrer une e-mail valide";
+            }
+
+            
         },
     }
 

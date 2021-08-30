@@ -1,32 +1,23 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex)
-/*
+
 export default new Vuex.Store({
   state: {
-    token: localStorage.getItem('token'),
-    idUSer: localStorage.getItem('token'),
-  },
-  getters: {
-    token(state) {
-      return `${state.token}`
-    }
-  },
-  
-  mutations: {
-    CHANGE_TOKEN(state, token) {
-      state.token = token;
-    }
-  },
-  actions: {
-    change_token(context, token) {
-        context.commit('CHANGE_TOKEN', token)
-    }
-  },
-  
-  modules: {
-  }
+      authenticated: false,
+      role: null
+    },
+    mutations: {
+      setAuthentication(state, status) {
+        state.authenticated = status;
+      },
+      setRole(state, status) {
+        state.role = status;
+      }
+    },
+    plugins: [createPersistedState()]
 })
-*/
+
+

@@ -29,6 +29,7 @@
 <script>
 import Alert from '@/components/Alert.vue'
 import axios from 'axios';
+import {escapeHtml, validationText} from '@/validation';
 
 export default({
     data() {
@@ -42,49 +43,62 @@ export default({
         Alert,
     },
     methods: {
+        escapeHtml,
+        validationText,
         getFormValues(submitEvent){
             this.error = '';
             let idPost = this.$route.params.id;
             var post = {};
-            if (this.selectedFile == null ) {
-            post.title = submitEvent.target.elements.title.value;
-            axios.put("http://localhost:3000/api/post/modify/" + idPost, post, {
-                    headers:{
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                    }
-                })
-                .then((response) => {
-                    console.log(response.data);
-                    let idPost = response.data;
-                    this.$router.push('/post/' + idPost);
-                }, (err) => {
-                    this.error = err.response.data;
-                })
+            let error = false;
 
-            }/* else {
-                
-                post.title = submitEvent.target.elements.title.value;
-                post = JSON.stringify(post);
-
-                let data = new FormData();
-                data.append('image', this.selectedFile, this.selectedFile.name)
-                data.append('content', post)
-
-                axios.post("http://localhost:3000/api/post/modify", data, {
-                    headers:{
-                        'Content-Type' : 'multipart/form-data',
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                    }
-                })
-                .then((response) => {
-                    let idPost = response.data;
-                    this.$router.push('/post/' + idPost);
-                }, (err) => {
-                    this.error = err.response.data;
-                })
+            var title = escapeHtml(submitEvent.target.elements.title.value);
+            let checkTitle = validationText(title);
+             if(checkTitle == null) {
+                error = true;
+            } else {
+                title = checkTitle;
             }
-            */
-            
+
+            if (error == false ) {
+
+                if (this.selectedFile == null ) {
+                post.title = title;
+                axios.put("http://localhost:3000/api/post/modify/" + idPost, post, {
+                        headers:{
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        }
+                    })
+                    .then((response) => {
+                        console.log(response.data);
+                        let idPost = response.data;
+                        this.$router.push('/post/' + idPost);
+                    }, (err) => {
+                        this.error = err.response.data;
+                    })
+
+                } else {
+                    console.log(title);
+                    let data = new FormData();
+                    data.append('image', this.selectedFile, this.selectedFile.name)
+                    data.append('title', title)
+
+                    axios.put("http://localhost:3000/api/post/modify/" + idPost, data, {
+                        headers:{
+                            'Content-Type' : 'multipart/form-data',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        }
+                    })
+                    .then((response) => {
+                        let idPost = response.data;
+                        this.$router.push('/post/' + idPost);
+                    }, (err) => {
+                        this.error = err.response.data;
+                    })
+                }
+
+            } else {
+                this.error = "Veuillez entrer du text valide";
+            }
         },
          getPost() {
             let id = this.$route.params.id;

@@ -22,8 +22,8 @@
 
             <input ref="inputFile" @change="selectImg" type="file"
                 id="avatar" name="avatar"
-                accept="image/png, image/jpeg">
-        <input type="submit" value="Poster">
+                accept="image/png, image/jpeg" required>
+        <input type="submit" value="Réagir">
         </form>
 
     </div>
@@ -58,7 +58,6 @@ export default({
                 }
             })
              .then((response) => {
-                 console.log(response);
                 this.post = response.data.post[0];
                 this.reactions = response.data.reactions;
             })
@@ -70,6 +69,7 @@ export default({
 
             let data = new FormData();
                 data.append('image', this.selectedFile, this.selectedFile.name)
+                data.append('id_user', localStorage.getItem('idUser'));
 
                 let id = this.$route.params.id;
 
@@ -82,11 +82,10 @@ export default({
                 .then((response) => {
                     let reaction = {
                         email : response.data.email,
-                        urlImg : response.data.urlImg,
+                        url_img : response.data.urlImg,
                     };
-
                     this.reactions.push(reaction);
-                    this.$refs.inputFile.value=null 
+                    this.$refs.inputFile.value = null;
                 }, (err) => {
                     this.error = err.response.data;
                 })

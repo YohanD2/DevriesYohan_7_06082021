@@ -2,9 +2,7 @@ const db = require('../database');
 const { validationResult } = require('express-validator/check');
 const jwt = require('jsonwebtoken');
 
-// TRAITER L ERREUR
-// GET NB COMMENT
-// GET USER EMAIL
+
 exports.getAllArticle = async (req, res, next) => {
     try {
         let articles = await db.promise().query(`SELECT * FROM articles ORDER BY id DESC`);
@@ -19,27 +17,25 @@ exports.getAllArticle = async (req, res, next) => {
                 nbComment = nbComment[0][0].nbComment;
                 article.nbComment = nbComment;
             }
-            catch(err) {
-                console.log(err);
+            catch {
+                res.status(400).json("a"); 
             }
             try {
                 let userEmail = await db.promise().query(`SELECT email FROM users WHERE id = ${idUser}`);
                 email = userEmail[0][0].email;
                 article.email = email;
             }
-            catch(err) {
-                console.log(err);
+            catch {
+                res.status(400).json("b");
             }
         };
-
         res.status(200).send(articles);
     }
-    catch (err) {
-        console.log(err);
+    catch {
+        res.status(400).json("c");
     }
 };
 
-// TRAITER L ERREUR
 exports.getOneArticle = async (req, res, next) => {
     try {
         let id = req.params.id
@@ -56,50 +52,68 @@ exports.getOneArticle = async (req, res, next) => {
                     email = userEmail[0][0].email;
                     comment.email = email;
                 }
-                catch(err) {
-                    console.log(err);
+                catch {
+                    res.status(400).json("Une erreur est survenue");
                 }
             }
-
             const response = {
                 article,
                 comments
             }
             res.status(200).send(response);
         }
-        catch (err) {
-            console.log(err);
+        catch {
+            res.status(400).json("Une erreur est survenue");
         }
     }
-    catch (err) {
-        console.log(err);
+    catch {
+        res.status(400).json("Une erreur est survenue");
     }
 };
 
-// TRAITER L ERREUR
 exports.modifyArticle = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(403).json(errors.errors[0].msg);
     }
+
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
+    let idUser = decodedToken.idUser;
+    let roleUser = decodedToken.roleUser;
+
+    var id = req.params.id;
+
     try {
-        let id = req.params.id;
-        let title = req.body.title;
-        let content = req.body.content;
+        let id_user = await db.promise().query(`SELECT id_user FROM articles WHERE id = ${id}`);
+        id_user = id_user[0][0].id_user;
 
-        const response = await db.promise().query(`UPDATE articles SET title = '${title}', content = '${content}' WHERE id = ${id}`);
+        if (id_user == idUser || roleUser == "ADMIN" )  {
+            try {
+                let title = req.body.title;
+                let content = req.body.content;
 
-        let article = {
-            title,
-            content,
-            id
+                const response = await db.promise().query(`UPDATE articles SET title = '${title}', content = '${content}' WHERE id = ${id}`);
+
+                let article = {
+                    title,
+                    content,
+                    id
+                }
+                res.status(201).json(article);
+            }
+            catch {
+                res.status(400).json("Une erreur est survenue");
+            }
+        } else {
+            res.status(403).json("Une erreur est survenue");
         }
-     
-        res.status(201).json(article);
     }
-    catch(err) {
-        res.status(201).json("Une erreur est survenue");
+    catch {
+        res.status(400).json("Une erreur est survenue");
     }
+
+   
 };
 
 // TRAITER L ERREUR
@@ -108,52 +122,68 @@ exports.createArticle = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(403).json(errors.errors[0].msg);
     }
-    // GET DATA :
-    // TITLE
-    // CONTENT
-    // ID_USER
+
     let title = req.body.title;
     let content = req.body.content;
+    let id_user = req.body.id_user;
 
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
     let idUser = decodedToken.idUser;
 
-    // CHECK DATA
-    // SPCIALCAHR + ' FOR SQL ERROR
-
-    try {
-        const response = await db.promise().query(`INSERT INTO articles (id_user, title, content) VALUES ('${idUser}', '${title}', '${content}') `);
-        id = response[0].insertId;
-
-        let article = {
-            title,
-            content,
-            id
-        }
-     
-        res.status(201).json(article);
-    }
-    catch (err) {
-        console.log(err);
-    }
+    if ( idUser == id_user ) {
+        try {
+            const response = await db.promise().query(`INSERT INTO articles (id_user, title, content) VALUES ('${idUser}', '${title}', '${content}') `);
+            id = response[0].insertId;
     
+            let article = {
+                title,
+                content,
+                id
+            }
+         
+            res.status(201).json(article);
+        }
+        catch {
+            res.status(400).json("Une erreur est survenue");
+        }
+    }
+    else {
+        res.status(403).json("Une erreur est survenue");
+    }
 };
 
 // TRAITER L ERREUR
 exports.deleteArticle = async (req, res, next) => {
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
+    let idUser = decodedToken.idUser;
+    let roleUser = decodedToken.roleUser;
+
     try {
         let id = req.params.id;
-        const response = await db.promise().query(`DELETE FROM articles WHERE id = ${id}`);
-        try {
-            const deleteComments = await db.promise().query(`DELETE FROM comments WHERE id_article = ${id}`);
-            res.status(201).json({msg: "article supprimé"});
-        }
-        catch(err) {
-            console.log(err);
+        let id_user = await db.promise().query(`SELECT id_user FROM articles WHERE id = ${id}`);
+        id_user = id_user[0][0].id_user;
+        if(idUser == id_user || roleUser == "ADMIN") {
+            try {
+                const response = await db.promise().query(`DELETE FROM articles WHERE id = ${id}`);
+                try {
+                    const deleteComments = await db.promise().query(`DELETE FROM comments WHERE id_article = ${id}`);
+                    res.status(201).json({msg: "article supprimé"});
+                }
+                catch {
+                    res.status(400).json("Une erreur est survenue");
+                }
+            }
+            catch {
+                res.status(400).json("Une erreur est survenue");
+            }
+        } else {
+            res.status(403).json("Une erreur est survenue");
         }
     }
-    catch (err) {
-        console.log(err);
+    catch {
+        res.status(400).json("Une erreur est survenue");
     }
+    
 }

@@ -11,10 +11,10 @@ router.get('/', postController.getAllPost);
 router.get('/:id', postController.getOnePost);
 
 //MODIFY ONE
-router.put('/modify/:id', postController.modifyPost);
+router.put('/modify/:id', multer, validation.post, postController.modifyPost);
 
 //CREATE ONE
-router.post('/new', multer, postController.createPost);
+router.post('/new', multer, validation.post, postController.createPost);
 
 //DELETE ONE
 router.delete('/delete/:id', postController.deletePost);

@@ -13,7 +13,7 @@
             <div class="inputLine">
                 <label class="infoText" for="story">Contenu de l'article</label>
                 <textarea name="content" id="story"
-                        rows="5" cols="33">
+                        rows="5" cols="33" required>
                 </textarea>
             </div>
             <div class="inputLine">
@@ -26,6 +26,7 @@
 <script>
 import Alert from '@/components/Alert.vue'
 import axios from 'axios';
+import {escapeHtml, validationText} from "@/validation";
 
 export default({
     data() {
@@ -38,24 +39,46 @@ export default({
         Alert,
     },
     methods: {
+        escapeHtml,
+        validationText,
         getFormValues(submitEvent){
             this.error = '';
-
             const article = {};
-            article.title = submitEvent.target.elements.title.value;
-            article.content = submitEvent.target.elements.content.value;
+            let error = false;
 
-            axios.post("http://localhost:3000/api/article/new", article, {
-                headers:{
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                }
-            })
-            .then((response) => {
-                this.$router.push('/article/' + response.data.id);
+            let title = escapeHtml(submitEvent.target.elements.title.value);
+            let content = escapeHtml(submitEvent.target.elements.content.value);
 
-            }, (err) => {
-                this.error = err.response.data;
-            })
+            let checkTitle = validationText(title);
+             if(checkTitle == null) {
+                error = true;
+            } else {
+                article.title = checkTitle;
+            }
+
+            let checkContent = validationText(content);
+             if(checkContent == null) {
+                error = true;
+            } else {
+                article.content = checkContent;
+            }
+
+            if ( error == false ) {
+                article.id_user = localStorage.getItem('idUser');
+                axios.post("http://localhost:3000/api/article/new", article, {
+                    headers:{
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                })
+                .then((response) => {
+                    this.$router.push('/article/' + response.data.id);
+
+                }, (err) => {
+                    this.error = err.response.data;
+                })
+            } else {
+                this.error = "Veuillez entrer du text valide";
+            }
         },
     }
 

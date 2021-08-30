@@ -36,7 +36,6 @@
 
 <script>
 import axios from 'axios';
-
 export default({
 data() {
         return {
@@ -45,6 +44,7 @@ data() {
     },
     methods: {
       getUser() {
+
         axios.get("http://localhost:3000/api/user/" + localStorage.getItem('idUser'), {
               headers:{
                   'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -52,20 +52,24 @@ data() {
           })
           .then((response) => {
             this.email = response.data[0].email;
+
           })
       },
       disconnect() {
         localStorage.clear();
+        this.$store.commit("setAuthentication", false);
         this.$router.push('/login');
       },
       deleteAccount() {
-        axios.delete("http://localhost:3000/api/user/delete/", {
+        let idUser = localStorage.getItem('idUser');
+        axios.delete("http://localhost:3000/api/user/delete/" + idUser, {
               headers:{
                   'Authorization': 'Bearer ' + localStorage.getItem('token')
               }
           })
           .then(() => {
             localStorage.clear();
+            this.$store.commit("setAuthentication", false);
             this.$router.push('/signup');
           })
       },

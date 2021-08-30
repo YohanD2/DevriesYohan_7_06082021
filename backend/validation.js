@@ -50,12 +50,15 @@ exports.loginUser = [
 ];
 
 // ARTICLE
+// CREATE AND MODIFY
 exports.article = [
   check('title')
     .notEmpty()
     .withMessage('Donnez un titre à l\'article')
     .isLength({ min: 5 })
     .withMessage('Le titre de l\'article doit être de 5 caractères minimum')
+    .isLength({ max: 100 })
+    .withMessage('Le titre de l\'article doit être de 100 caractères maximum')
     .escape(),
 
   check('content')
@@ -66,8 +69,8 @@ exports.article = [
     .escape(),
 ];
 
-
 // COMMENT
+// ADD
 exports.comment = [
   check('content')
     .notEmpty()
@@ -77,10 +80,24 @@ exports.comment = [
     .escape(),
 ];
 
-// MESSAGE 
+// MESSAGE
+// ADD
 exports.message = [
   check('content')
     .notEmpty()
     .withMessage('Le message ne peut pas être vide')
+    .escape(),
+]
+
+//Posts
+// ADD AND MODIFY
+exports.post = [
+  check('title')
+    .notEmpty()
+    .withMessage('Le titre ne peut pas être vide')
+    .isLength({ min: 5 })
+    .withMessage('Le titre du post doit être de 5 caractères minimum')
+    .isLength({ max: 100 })
+    .withMessage('Le titre du post doit être de 100 caractères maximum')
     .escape(),
 ]

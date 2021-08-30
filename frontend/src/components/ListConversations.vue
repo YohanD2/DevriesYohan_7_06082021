@@ -35,19 +35,18 @@ export default({
     data() {
         return {
             conversations: [],
-            idUser: ''
         }
     },
     methods: {
         getUnits(){
-            axios.get("http://localhost:3000/api/conversation/", {
+            var id_user = localStorage.getItem('idUser');
+            axios.get("http://localhost:3000/api/conversation/user/" + id_user , {
                 headers:{
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 }
             })
             .then((response) => {
                 this.conversations = response.data;
-                this.idUser = localStorage.getItem('idUser');
 
                 //this.conversations = (response.data[0]);
                 /*
@@ -79,8 +78,7 @@ export default({
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 }
             })
-            .then((response) => {
-                console.log(response);
+            .then(() => {
                 this.conversations.splice(index, 1);
             })
         }

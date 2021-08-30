@@ -2,6 +2,7 @@ const db = require('../database');
 const { validationResult } = require('express-validator/check');
 const jwt = require('jsonwebtoken');
 const { promises: fs } = require("fs");
+const { query } = require('../database');
 
 exports.getAllPost = async (req, res, next) => {
     try {
@@ -9,13 +10,14 @@ exports.getAllPost = async (req, res, next) => {
         posts = posts[0];
         
         for(let post of posts) {
+            let idUser = post.id_user;
             try {
-                var email = await db.promise().query(`SELECT email FROM users WHERE id = ${post.id_user}`);
+                var email = await db.promise().query(`SELECT email FROM users WHERE id = ${idUser}`);
                 email = email[0][0].email;
                 post.email = email;
             }
-            catch(err) {
-                console.log(err);
+            catch {
+                res.status(400).json("select user email");
             }
 
             try {
@@ -24,16 +26,14 @@ exports.getAllPost = async (req, res, next) => {
                 nbReaction = nbReaction[0][0].nbReaction;
                 post.nbReaction = nbReaction;
             }
-            catch(err) {
-                console.log(err);
+            catch {
+                res.status(400).json("Une erreur est survenue");
             }
         }
-       
         res.status(200).send(posts);
     }
-    catch (err) {
-        console.log(err);
-        
+    catch {
+        res.status(400).json("select");
     }
 };
 
@@ -58,111 +58,173 @@ exports.getOnePost = async (req, res, next) => {
             }
             res.status(200).send(response);
         }
-        catch (err) {
-            console.log(err);
+        catch {
+            res.status(400).json("Une eur est survenue");
         }
     }
-    catch(err) {
-        console.log(err);
+    catch {
+        res.status(400).json("Une erreur est survenue");
     }
 };
 
-// TRAITER L ERREUR
 exports.modifyPost = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(403).json(errors.errors[0].msg);
+    }
     let idPost = req.params.id;
-    if(req.file != undefined) {
-        try {
-            var urlImg = await db.promise().query(`SELECT url_img FROM posts WHERE id = ${id}`);
-            urlImg = urlImg[0][0].url_img;
-            var filename = urlImg.split('/images/')[1];
-            try {
-                fs.unlink(`images/${filename}`);
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
+        let idUser = decodedToken.idUser;
+        let roleUser = decodedToken.roleUser;
+
+        let id_user = await db.promise().query(`SELECT id_user FROM posts WHERE id = ${idPost}`);
+        id_user = id_user[0][0].id_user;
+        if(idUser == id_user || roleUser == "ADMIN" ) {
+            if(req.file != undefined) {
                 try {
-                    let post = req.body.content;
-                    post = JSON.parse(post);
-                    let title = post.title;
-                    var urlImg = req.protocol + "://" + req.get('host') + "/images/" + req.file.filename;
-                    await db.promise().query(`UPDATE posts SET title = '${title}', content = '${urlImg}' WHERE id = ${idPost}`);
+                    var urlImg = await db.promise().query(`SELECT url_img FROM posts WHERE id = ${idPost}`);
+                    urlImg = urlImg[0][0].url_img;
+        
+                    var filename = urlImg.split('/images/')[1];
+                    try {
+                        fs.unlink(`images/${filename}`);
+                        try {
+                            let title = req.body.title;
+                            var urlImg = req.protocol + "://" + req.get('host') + "/images/" + req.file.filename;
+                            await db.promise().query(`UPDATE posts SET title = '${title}', url_img = '${urlImg}' WHERE id = ${idPost}`);
+                            res.status(201).json(idPost);
+                        }
+                        catch {
+                            res.status(400).json("Une erreur est survenue");
+                        }
+                    }
+                    catch {
+                        res.status(400).json("Une erreur est survenue");
+                    }
+                }
+                catch {
+                    res.status(400).json("Une erreur est survenue");
+                }
+            } else {
+                try {
+                    let title = req.body.title;
+        
+                    await db.promise().query(`UPDATE posts SET title = '${title}' WHERE id = ${idPost}`);
                     res.status(201).json(idPost);
                 }
-                catch(err) {
-                    console.log(err);
+                catch {
+                    res.status(400).json("Une erreur est survenue");
                 }
             }
-            catch(err) {
-                console.log(err);
-            }
-        }
-        catch(err) {
-            console.log(err);
-        }
-    } else {
-        try {
-            let post = req.body;
-
-            let title = post.title;
-            await db.promise().query(`UPDATE posts SET title = '${title}' WHERE id = ${idPost}`);
-            res.status(201).json(idPost);
-        }
-        catch(err) {
-            console.log(err);
+        } else {
+            res.status(403).json("Une erreur est survenue");
         }
     }
-   
+    catch {
+        res.status(400).json("Une erreur est survenue");
+    }
 };
 
-// TRAITER L ERREUR
 exports.createPost = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(403).json(errors.errors[0].msg);
+    }
 
-    let post = req.body.content;
-    post = JSON.parse(post);
-    let title = post.title;
+    let title = req.body.title;
 
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
     let idUser = decodedToken.idUser;
 
-    let urlImg = req.protocol + "://" + req.get('host') + "/images/" + req.file.filename;
+    let id_user = req.body.id_user;
 
-    try {
-        const response = await db.promise().query(`INSERT INTO posts (title, id_user, url_img) VALUES ('${title}', '${idUser}', '${urlImg}')`);
-        id = response[0].insertId;
-     
-        res.status(201).json(id);
-    }
-    catch (err) {
-        console.log(err);
+    if (idUser == id_user ) {
+        let urlImg = req.protocol + "://" + req.get('host') + "/images/" + req.file.filename;
+
+        try {
+            const response = await db.promise().query(`INSERT INTO posts (title, id_user, url_img) VALUES ('${title}', '${idUser}', '${urlImg}')`);
+            id = response[0].insertId;
+         
+            res.status(201).json(id);
+        }
+        catch {
+            res.status(400).json("Une erreur est survenue");
+        }
+    } else {
+        res.status(400).json("Une erreur est survenue");
     }
 };
 
-// TRAITER L ERREUR
+
 exports.deletePost = async (req, res, next) => {
-    let id = req.params.id;
+    var id = req.params.id;
+
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
+    let idUser = decodedToken.idUser;
+    let roleUser = decodedToken.roleUser;
+
     try {
-        var urlImg = await db.promise().query(`SELECT url_img FROM posts WHERE id = ${id}`);
-        urlImg = urlImg[0][0].url_img;
-        var filename = urlImg.split('/images/')[1];
-        try {
-            fs.unlink(`images/${filename}`);
+        let id_user = await db.promise().query(`SELECT id_user FROM posts WHERE id = ${id}`);
+        id_user = id_user[0][0].id_user;
+        if( idUser == id_user || roleUser == "ADMIN" ) {
             try {
-                await db.promise().query(`DELETE FROM posts WHERE id = ${id}`);
+                var urlImg = await db.promise().query(`SELECT url_img FROM posts WHERE id = ${id}`);
+                urlImg = urlImg[0][0].url_img;
+                var filename = urlImg.split('/images/')[1];
                 try {
-                    await db.promise().query(`DELETE FROM reactions WHERE id_post = ${id}`);
-                    res.status(201).json({msg: "post supprimé"});
+                    fs.unlink(`images/${filename}`);
+                    try {
+                        await db.promise().query(`DELETE FROM posts WHERE id = ${id}`);
+                        try {
+                            let reactionImg = await db.promise().query(`SELECT url_img FROM reactions WHERE id_post = ${id}`);
+                            if(reactionImg[0].length != 0) {
+                                try {
+                                    await db.promise().query(`DELETE FROM reactions WHERE id_post = ${id}`);
+                                    reactionImg = reactionImg[0];
+                                    for (let img of reactionImg) {
+                                        reactionImg = img.url_img;
+                                        var reactionFilename = reactionImg.split('/images/')[1];
+                                        try {
+                                            fs.unlink(`images/${reactionFilename}`);
+                                        }
+                                        catch{
+                                            res.status(400).json("Une erreur est survenue");
+                                        }
+                                    }
+                                    res.status(201).json({msg: "post supprimé"});
+                                }
+                                catch {
+                                    res.status(400).json("Une erreur est survenue");
+                                }
+        
+                            } else {
+                                res.status(201).json({msg: "post supprimé"});
+                            }
+                        }
+                        catch {
+                            res.status(400).json("Une erreur est survenue");
+                        }
+                    }
+                    catch  {
+                        res.status(400).json("Une erreur est survenue");
+                    }
                 }
-                catch(err) {
-                    console.log(err);
+                catch  {
+                    res.status(400).json("Une erreur est survenue");
                 }
             }
-            catch (err) {
-                console.log(err);
+            catch {
+                res.status(400).json("Une erreur est survenue");
             }
-        }
-        catch (err) {
-            console.log(err);
+        } else {
+            res.status(403).json("Une erreur est survenue");
         }
     }
-    catch(err) {
-        console.log(err);
+    catch {
+        res.status(400).json("Une erreur est survenue");
     }
 }
